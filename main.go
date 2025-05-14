@@ -12,10 +12,10 @@ import (
 func main() {
 	mode := os.Args[1]
 
+	c := make(chan int)
 	r := rate.Limit(1.0)
 	l := rate.NewLimiter(r, 5)
 
-	c := make(chan int)
 	for i := range 10 {
 		switch mode {
 		case "allow":
@@ -25,14 +25,19 @@ func main() {
 		case "wait":
 			go doSomethingWithWait(l, i, c)
 		default:
-			fmt.Println("Invalid mode. Use 'allow', 'reserve', or 'wait'.")
-			return
+			go doSomething(i, c)
 		}
 	}
 
 	for range 10 {
 		<-c
 	}
+}
+
+func doSomething(x int, c chan int) {
+	fmt.Printf("goroutine %d did something\n", x)
+
+	c <- x
 }
 
 func doSomethingWithAllow(l *rate.Limiter, x int, c chan int) {
