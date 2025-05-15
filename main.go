@@ -23,7 +23,8 @@ func main() {
 		case "reserve":
 			go doSomethingWithReserve(l, i, c)
 		case "wait":
-			go doSomethingWithWait(l, i, c)
+			ctx := context.Background()
+			go doSomethingWithWait(ctx, l, i, c)
 		default:
 			go doSomething(i, c)
 		}
@@ -48,8 +49,8 @@ func doSomethingWithAllow(l *rate.Limiter, x int, c chan int) {
 	c <- x
 }
 
-func doSomethingWithWait(l *rate.Limiter, x int, c chan int) {
-	err := l.Wait(context.Background())
+func doSomethingWithWait(ctx context.Context, l *rate.Limiter, x int, c chan int) {
+	err := l.Wait(ctx)
 	if err != nil {
 		fmt.Printf("Error waiting for %d: %v\n", x, err)
 		c <- x
@@ -74,9 +75,10 @@ func doSomethingWithReserve(l *rate.Limiter, x int, c chan int) {
 	c <- x
 }
 
-func doSomethingWithCircuitBreaker() {
-	s := rate.Sometimes{Every: 2}
-	s.Do(func() { fmt.Println("1") })
-	s.Do(func() { fmt.Println("2") })
-	s.Do(func() { fmt.Println("3") })
-}
+// func main() {
+// 	s := rate.Sometimes{Every: 2}
+
+// 	for i := range 10 {
+// 		s.Do(func() { fmt.Printf("Allowing %d to run!\n", i) })
+// 	}
+// }
