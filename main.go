@@ -73,3 +73,10 @@ func doSomethingWithReserve(l *rate.Limiter, x int, c chan int) {
 
 	c <- x
 }
+
+func doSomethingWithCircuitBreaker() {
+	s := rate.Sometimes{Every: 2}
+	s.Do(func() { fmt.Println("1") })
+	s.Do(func() { fmt.Println("2") })
+	s.Do(func() { fmt.Println("3") })
+}
